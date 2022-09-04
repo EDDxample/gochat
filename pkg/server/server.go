@@ -1,6 +1,7 @@
 package server
 
 import (
+	"bufio"
 	"fmt"
 	"net"
 )
@@ -85,18 +86,31 @@ func (s *Server) HandleConnection(conn net.Conn) {
 
 	clientName := conn.RemoteAddr().String()
 
+	// send join messages
 	s.SendToClient(fmt.Sprintf("Welcome to the server, [%s]!\n", clientName), clientChannel)
-	s.SendToServer(fmt.Sprintf("# [%s] joined the chat!\n", clientName))
-
+	joinMsg := fmt.Sprintf("# [%s] joined the chat!\n", clientName)
+	s.SendToServer(joinMsg)
+	fmt.Printf(joinMsg)
 	s.joiningClients <- clientChannel
-	s.SendToServer(fmt.Sprintf("# [%s] left the chat!", clientName))
+
+	// scan for new client messages
+	clientScanner := bufio.NewScanner(conn)
+	for clientScanner.Scan() {
+		s.SendToServer(fmt.Sprintf("[%s]: %s\n", clientName, clientScanner.Text()))
+	}
+
+	// send leave messages
+	s.leavingClients <- clientChannel
+	leaveMsg := fmt.Sprintf("# [%s] left the chat!\n", clientName)
+	s.SendToServer(leaveMsg)
+	fmt.Printf(leaveMsg)
 }
 
 // ProcessOutboundMessages writes the registered messages
 // from the given channel to the client connection
 func (s *Server) ProcessOutboundMessages(conn net.Conn, clientChannel <-chan string) {
 	for message := range clientChannel {
-		fmt.Fprintf(conn, message)
+		fmt.Fprintln(conn, message)
 	}
 }
 
