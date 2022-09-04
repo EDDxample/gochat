@@ -21,4 +21,8 @@ go run .\cmd\client -h <host> -p <port>
 ``` 
 
 ### Resources
-Previous version: https://github.com/EDDxample/Socket_Client-Server_Chat
+Previous Chat Version: https://github.com/EDDxample/Socket_Client-Server_Chat
+
+Go Project Layout: https://github.com/golang-standards/project-layout
+
+Uber's Coding Style Guide: https://github.com/uber-go/guide/blob/master/style.md
